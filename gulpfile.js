@@ -58,11 +58,12 @@ function styleTask(){
 				.pipe(sass().on('error', sass.logError))
 				.pipe(gulpif(PRODUCTION, minify({compability: 'ie8'})))
 				.pipe(gulpif(!PRODUCTION, sourcemaps.write()))
-				.pipe(gulp.dest(paths.styles.dest));
+				.pipe(gulp.dest(paths.styles.dest))
+				.pipe(server.stream());
 }
 
 function watch(){
-	gulp.watch('src/assets/scss/**/*.scss', gulp.series(styleTask, reload));
+	gulp.watch('src/assets/scss/**/*.scss', styleTask);
 	gulp.watch('**/*.php', reload);
 	gulp.watch('src/assets/js/**/*.js', gulp.series(scripts, reload));
 }
