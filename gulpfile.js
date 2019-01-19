@@ -1,13 +1,14 @@
-let gulp = require('gulp');
-let yargs = require('yargs');
-let sass = require('gulp-sass');
-let minify = require('gulp-clean-css');
-let gulpif = require('gulp-if');
-let sourcemaps = require('gulp-sourcemaps');
-let imagemin = require('gulp-imagemin');
-let del = require('del');
-let webpack = require('webpack-stream');
-let uglify = require('gulp-uglify');
+const gulp = require('gulp');
+const yargs = require('yargs');
+const sass = require('gulp-sass');
+const minify = require('gulp-clean-css');
+const gulpif = require('gulp-if');
+const sourcemaps = require('gulp-sourcemaps');
+const imagemin = require('gulp-imagemin');
+const del = require('del');
+const webpack = require('webpack-stream');
+const uglify = require('gulp-uglify');
+const browserSync = require('browser-sync');
 
 gulp.task('style', styleTask);
 gulp.task('watch', watch);
@@ -18,6 +19,7 @@ gulp.task('dev', dev);
 gulp.task('scripts', scripts);
 
 const PRODUCTION = yargs.argv.prod;
+const server = browserSync.create();
 
 const paths = {
 	styles: {
@@ -34,6 +36,18 @@ const paths = {
 	}
 }
 
+function serve(done){
+	server.init({
+		proxy: 'http://localhost/wordpress'
+	});
+	done();
+}
+
+function reload(done){
+	server.reload();
+	done();
+}
+
 function clean(){
 	return del(['dist']);
 }
@@ -48,8 +62,9 @@ function styleTask(){
 }
 
 function watch(){
-	gulp.watch('src/assets/css/**/*.scss', styleTask);
-	gulp.watch('src/assets/js/**/*.js', scripts);
+	gulp.watch('src/assets/scss/**/*.scss', gulp.series(styleTask, reload));
+	gulp.watch('**/*.php', reload);
+	gulp.watch('src/assets/js/**/*.js', gulp.series(scripts, reload));
 }
 
 function images(){
@@ -84,5 +99,10 @@ function build(){
 }
 
 function dev(){
-	return gulp.series(clean, gulp.parallel(styleTask, scripts, images), watch)();
+	return gulp.series(clean, gulp.parallel(styleTask, scripts, images), serve, watch)();
 }
+
+
+
+
+
