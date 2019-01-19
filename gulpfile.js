@@ -14,6 +14,7 @@ gulp.task('images', images);
 gulp.task('clean', clean);
 gulp.task('build', build);
 gulp.task('dev', dev);
+gulp.task('scripts', scripts);
 
 const PRODUCTION = yargs.argv.prod;
 
@@ -25,6 +26,10 @@ const paths = {
 	images: {
 		src: 'src/assets/images/**/*.{jpg,jpeg,png,svg}',
 		dest: 'dist/assets/images'
+	},
+	scripts: {
+		src: 'src/assets/js/**/*.js',
+		dest: 'dist/assets/js'
 	}
 }
 
@@ -42,7 +47,8 @@ function styleTask(){
 }
 
 function watch(){
-	return gulp.watch('src/assets/**/*.scss', styleTask);
+	gulp.watch('src/assets/css/*.scss', styleTask);
+	gulp.watch('src/assets/js/*.js', scripts);
 }
 
 function images(){
@@ -52,7 +58,22 @@ function images(){
 }
 
 function scripts(){
-	return gulp.src()
+	return gulp.src(paths.scripts.src)
+				.pipe(webpack({
+					module: {
+						rules: [
+							{ 
+								test: /\.js$/,
+								use: ['babel-loader'],
+								exclude: /node_modules/
+							}
+						]
+					},
+					output: {
+						filename: 'main.js'
+					}
+				}))
+				.pipe(gulp.dest(paths.scripts.dest))
 }
 
 function build(){
