@@ -7,6 +7,7 @@ let sourcemaps = require('gulp-sourcemaps');
 let imagemin = require('gulp-imagemin');
 let del = require('del');
 let webpack = require('webpack-stream');
+let uglify = require('gulp-uglify');
 
 gulp.task('style', styleTask);
 gulp.task('watch', watch);
@@ -47,8 +48,8 @@ function styleTask(){
 }
 
 function watch(){
-	gulp.watch('src/assets/css/*.scss', styleTask);
-	gulp.watch('src/assets/js/*.js', scripts);
+	gulp.watch('src/assets/css/**/*.scss', styleTask);
+	gulp.watch('src/assets/js/**/*.js', scripts);
 }
 
 function images(){
@@ -71,15 +72,17 @@ function scripts(){
 					},
 					output: {
 						filename: 'main.js'
-					}
+					},
+					devtool: !PRODUCTION ? 'inline-source-map':false
 				}))
+				.pipe(gulpif(PRODUCTION, uglify()))
 				.pipe(gulp.dest(paths.scripts.dest))
 }
 
 function build(){
-	return gulp.series(clean, gulp.parallel(styleTask, images))();
+	return gulp.series(clean, gulp.parallel(styleTask, scripts, images))();
 }
 
 function dev(){
-	return gulp.series(clean, gulp.parallel(styleTask, images), watch)();
+	return gulp.series(clean, gulp.parallel(styleTask, scripts, images), watch)();
 }
