@@ -19,6 +19,13 @@ Then create dist and src folder at the save level of gulpfile.js
     ---scss <br>
     ---images <br>
 
+Don't forget to change browsync proxy in gulpfile.js
+```javascript
+server.init({
+	proxy: 'http://localhost/wordpress' // change this url to your own
+});
+```
+
 Then run:
 ```
 gulp dev
